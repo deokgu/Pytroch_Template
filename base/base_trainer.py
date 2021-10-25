@@ -3,6 +3,8 @@ from abc import abstractmethod
 from numpy import inf
 from logger import TensorboardWriter
 from sklearn.model_selection import KFold, StratifiedKFold
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+from .utils import making_group, collate_fn
 import copy
 
 
@@ -10,7 +12,7 @@ class BaseTrainer:
     """
     Base class for all trainers
     """
-    def __init__(self, model, criterion, metric_ftns, optimizer, config):
+    def __init__(self, model, criterion, metric_ftns = None, optimizer =None, config = None):
         self.config = config
         if self.config["save"] : self.logger = config.get_logger('trainer', config['trainer']['verbosity'])
 
@@ -18,6 +20,7 @@ class BaseTrainer:
         self.criterion = criterion
         self.metric_ftns = metric_ftns
         self.optimizer = optimizer
+        self.data_set = data_set
 
         cfg_trainer = config['trainer']
         self.epochs = cfg_trainer['epochs']
@@ -63,44 +66,69 @@ class BaseTrainer:
         Full training logic
         """
         not_improved_count = 0
-        for epoch in range(self.start_epoch, self.epochs + 1):
-            result = self._train_epoch(epoch)
+        
+        # FIXME: 설정에 따라서 일반, k, strati, multilabel 설정하자.
+        Y = making_group(self.data_set)
+        mskf = MultilabelStratifiedKFold(n_splits=self.config["fold_split"],  shuffle=True, random_state=self.config["seed"])
 
-            # save logged informations into log dict
-            log = {'epoch': epoch}
-            log.update(result)
+        for kfold, (train_index, validate_index) in enumerate(mskf.split(self.data_set, Y)):
+            train_dataset = torch.utils.data.dataset.Subset(self.data_set, train_index)
+            valid_dataset = torch.utils.data.dataset.Subset(self.data_set, validate_index)
 
-            # print logged informations to the screen
-            for key, value in log.items():
-                if self.config["save"] : self.logger.info('    {:15s}: {}'.format(str(key), value))
+            train_loader = DataLoader(train_dataset,
+                            batch_size=self.config["batch_size"],
+                            shuffle=self.config["shuffle"],
+                            num_workers=self.config["num_workers"],
+                            collate_fn=collate_fn,
+                            drop_last=True 
+                        )
 
-            # evaluate model performance according to configured metric, save best checkpoint as model_best
-            best = False
-            if self.mnt_mode != 'off':
-                try:
-                    # check whether model performance improved or not, according to specified metric(mnt_metric)
-                    improved = (self.mnt_mode == 'min' and log[self.mnt_metric] <= self.mnt_best) or \
-                               (self.mnt_mode == 'max' and log[self.mnt_metric] >= self.mnt_best)
-                except KeyError:
-                    if self.config["save"] : self.logger.warning("Warning: Metric '{}' is not found. "
-                                        "Model performance monitoring is disabled.".format(self.mnt_metric))
-                    self.mnt_mode = 'off'
-                    improved = False
+            val_loader = DataLoader(valid_dataset,
+                            batch_size=self.config["batch_size"],
+                            shuffle=self.config["shuffle"],
+                            num_workers=self.config["num_workers"],
+                            collate_fn=collate_fn,
+                            drop_last=True 
+                        )
 
-                if improved:
-                    self.mnt_best = log[self.mnt_metric]
-                    not_improved_count = 0
-                    best = True
-                else:
-                    not_improved_count += 1
+            for epoch in range(self.start_epoch, self.epochs + 1):
+                result = self._train_epoch(epoch, train_loader)
 
-                if not_improved_count > self.early_stop:
-                    if self.config["save"] :self.logger.info("Validation performance didn\'t improve for {} epochs. "
-                                     "Training stops.".format(self.early_stop))
-                    break
+                # save logged informations into log dict
+                log = {'epoch': epoch, "kfold": i}
+                log.update(result)
 
-            if epoch % self.save_period == 0 or best:
-                self._save_checkpoint(epoch, save_best=best)
+                # print logged informations to the screen
+                for key, value in log.items():
+                    if self.config["save"] : self.logger.info('{:15s}: {}'.format(str(key), value))
+
+                # evaluate model performance according to configured metric, save best checkpoint as model_best
+                best = False
+                if self.mnt_mode != 'off':
+                    # try:
+                    #     # check whether model performance improved or not, according to specified metric(mnt_metric)
+                    #     improved = (self.mnt_mode == 'min' and log[self.mnt_metric] <= self.mnt_best) or \
+                    #             (self.mnt_mode == 'max' and log[self.mnt_metric] >= self.mnt_best)
+                    # except KeyError:
+                    #     if self.config["save"] : self.logger.warning("Warning: Metric '{}' is not found. "
+                    #                         "Model performance monitoring is disabled.".format(self.mnt_metric))
+                    #     self.mnt_mode = 'off'
+                    #     improved = False
+
+                    if improved:
+                        self.mnt_best = log[self.mnt_metric]
+                        not_improved_count = 0
+                        best = True
+                    else:
+                        not_improved_count += 1
+
+                    if not_improved_count > self.early_stop:
+                        if self.config["save"] :self.logger.info("Validation performance didn\'t improve for {} epochs. "
+                                        "Training stops.".format(self.early_stop))
+                        break
+
+                if epoch % self.save_period == 0 or best:
+                    self._save_checkpoint(epoch, save_best=best)
 
     def _save_checkpoint(self, epoch, save_best=False):
         """

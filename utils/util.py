@@ -1,6 +1,7 @@
 import json
 import torch
 import pandas as pd
+from copy import deepcopy
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
@@ -48,6 +49,25 @@ def prepare_device(n_gpu_use):
     device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
     list_ids = list(range(n_gpu_use))
     return device, list_ids
+
+def collate_fn(batch):
+    return tuple(zip(*batch))
+    
+# FIXME yeild를 써서 바로 train_indxe, val_index를 리턴하자
+def making_group(data_set):
+    Y = []
+    temp = [0 for _ in range(10)]
+    # 전체를 구한다. 
+    for index in range(len(data_set)):
+        images, masks, image_infos =data_set[index]
+        categorys = np.unique(masks)
+        temp_2 = deepcopy(temp)
+        for cat in categorys:
+            if cat == 0: # Backgroud 
+                continue
+            temp_2[cat-1] = 1 
+        Y.append(temp_2)
+    return y
 
 class MetricTracker:
     def __init__(self, *keys, writer=None):

@@ -52,14 +52,16 @@ def main(config):
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
 
-    sys.exit()
     # get function handles of loss and metrics
-    criterion = getattr(module_loss, config["loss"])
+    criterion = config.init_obj("loss", module_loss)
+    # criterion = getattr(module_loss, config["loss"])
     metrics = [getattr(module_metric, met) for met in config["metrics"]]
-
+    
     # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+    
     optimizer = config.init_obj("optimizer", torch.optim, trainable_params)
+
     lr_scheduler = config.init_obj("lr_scheduler", torch.optim.lr_scheduler, optimizer)
 
     if config["type"] == "Classfication":
@@ -79,14 +81,15 @@ def main(config):
         trainer = Trainer.Trainer_seg(
             model,
             criterion,
-            metrics,
+            # metrics,
             optimizer,
             config=config,
             device=device,
             transform=transform,
-            data_loader=data_set,
+            data_set=data_set,
             lr_scheduler=lr_scheduler,
         )
+    sys.exit()
 
     trainer.train()
 

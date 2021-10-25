@@ -7,6 +7,7 @@
     "save": false,
     "batch_size": 8,
     "num_workers": 4,
+    "shuffle": true,
     "fold_split": 5,
     "debug": {
         "set_debug": true,
@@ -19,10 +20,10 @@
         }
     },
     "Net": {
-        "type": "SetSegmentationTorchvision",
+        "type": "HRNetV2",
         "args": {
-            "model_name": "fcn_resnet101",
-            "num_classes": 11
+            "num_classes": 11,
+            "W": 48
         }
     },
     "transform":{
@@ -33,6 +34,15 @@
             "resize": 0
         }
     },
+    "loss":{
+        "type": "FocalLoss",
+        "args" :{
+            "gamma": 2.0
+        }
+    }, 
+    "metrics": [
+        /*"accuracy", "top_k_acc"*/
+    ],
     "optimizer": {
         "type": "Adam",
         "args":{
@@ -41,15 +51,11 @@
             "amsgrad": true
         }
     },
-    "loss": "nll_loss",
-    "metrics": [
-        /*"accuracy", "top_k_acc"*/
-    ],
     "lr_scheduler": {
-        "type": "MultiStepLR",
+        "type": "CosineAnnealingLR",
         "args": {
-            "milestones": [10, 15, 20, 25, 30, 35, 40, 45],
-            "gamma": 0.05
+            "T_max" : 50,
+            "eta_min": 0
         }
     },
     "trainer": {
