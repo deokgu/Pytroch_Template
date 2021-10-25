@@ -1,2 +1,6 @@
-from .trainer_seg import *
-from .trainer_cls import *
+# classfication
+from .trainer_classfication import *
+
+
+# Segmentation
+from .trainer_segmentation import *

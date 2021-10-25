@@ -7,8 +7,11 @@
     "save": false,
     "batch_size": 8,
     "num_workers": 4,
-    "score_threshold": 0.5,
     "fold_split": 5,
+    "debug": {
+        "set_debug": true,
+        "ratio" : 0.2  /* data__split -> 0.2 : data 20% using */
+    },
     "data_set":{
         "type": "CustomSegDataSet",
         "args": {
@@ -25,8 +28,9 @@
     "transform":{
         "type": "CustomTransForm_seg",
         "args": {
-            "mean": [0.548, 0.504, 0.479],
-            "std": [0.237, 0.247, 0.246],
+            "mean": [0.460, 0.440, 0.418],
+            "std": [0.210, 0.207, 0.216],
+            "resize": 0
         }
     },
     "optimizer": {

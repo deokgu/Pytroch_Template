@@ -1,2 +1,6 @@
-from .model_cls import *
-from .model_seg import *
+# classfication basic
+from .model_classfication import *
+
+
+# Segmentation basic
+from .model_segmentation import *
