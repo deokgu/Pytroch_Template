@@ -12,7 +12,7 @@
     "log_step": 15, /* batch_size -> index % self.log_step */
     "debug": {
         "set_debug": false,
-        "ratio" : 0.1  /* data__split -> 0.2 : data 20% using */
+        "ratio" : 0.1  /* data__split -> 0.2 : data 20% using  test*/
     },
     "data_set":{
         "type": "CustomSegDataSet",
