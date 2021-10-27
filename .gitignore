@@ -6,8 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+*.pth
+
 # Distribution / packaging
 .Python
+
+logs/
 env/
 build/
 develop-eggs/
@@ -47,6 +51,9 @@ coverage.xml
 .hypothesis/
 
 # Translations
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
 *.mo
 *.pot
 

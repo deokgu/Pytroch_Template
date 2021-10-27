@@ -8,7 +8,9 @@ def nll_loss(output, target):
 
 
 # https://discuss.pytorch.org/t/is-this-a-correct-implementation-for-focal-loss-in-pytorch/43327/8
-class FocalLoss(nn.Module):
+# Focallosf for object Detection https://arxiv.org/pdf/1708.02002.pdf ??
+# TODO: 차이점 확인하기 
+class FocalLoss(nn.Module): # useing classfication 
     def __init__(self, weight=None, gamma=2.0, reduction="mean"):
         super().__init__()
         self.weight = weight
@@ -25,6 +27,41 @@ class FocalLoss(nn.Module):
             reduction=self.reduction,
         )
 
+class FocalLoss2d(nn.Module): #  for segmentation
+    def __init__(self, gamma=0, weight=None, size_average=True):
+        super(FocalLoss2d, self).__init__()
+
+        self.gamma = gamma
+        self.weight = weight
+        self.size_average = size_average
+
+    def forward(self, input, target):
+        if input.dim()>2:
+            input = input.contiguous().view(input.size(0), input.size(1), -1)
+            input = input.transpose(1,2)
+            input = input.contiguous().view(-1, input.size(2)).squeeze()
+        if target.dim()==4:
+            target = target.contiguous().view(target.size(0), target.size(1), -1)
+            target = target.transpose(1,2)
+            target = target.contiguous().view(-1, target.size(2)).squeeze()
+        elif target.dim()==3:
+            target = target.view(-1)
+        else:
+            target = target.view(-1, 1)
+
+        # compute the negative likelyhood
+        weight = Variable(self.weight)
+        logpt = -F.cross_entropy(input, target)
+        pt = torch.exp(logpt)
+
+        # compute the loss
+        loss = -((1-pt)**self.gamma) * logpt
+
+        # averaging (or not) loss
+        if self.size_average:
+            return loss.mean()
+        else:
+            return loss.sum()
 
 class LabelSmoothingLoss(nn.Module):
     def __init__(self, classes=18, smoothing=0.1, dim=-1):

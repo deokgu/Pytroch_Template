@@ -57,20 +57,20 @@ class CustomTransForm_seg(object):
         self.get_transforms()
 
     def get_transforms(self, need=("train", "val", "eavl")):
-        self.transformations = {}
+        self.transforms = {}
         if "train" in need:
-            self.transformations["train"] = A.Compose(
+            self.transforms["train"] = A.Compose(
                 [
-                    A.GridDropout(holes_number_x=30, holes_number_y=30, p=1.0),
-                    A.Normalize(mean=self.mean, std=self.std, p=1.0),
+                    # A.GridDropout(holes_number_x=30, holes_number_y=30, p=1.0),
+                    # A.Normalize(mean=self.mean, std=self.std, p=1.0),
                     ToTensorV2(p=1.0),
                 ]
             )
 
         if "val" in need:
-            self.transformations["val"] = albumentations.Compose(
+            self.transforms["val"] = albumentations.Compose(
                 [
-                    A.Normalize(mean=self.mean, std=self.std, p=1.0),
+                    # A.Normalize(mean=self.mean, std=self.std, p=1.0),
                     ToTensorV2(p=1.0),
                 ]
             )

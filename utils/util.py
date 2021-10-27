@@ -1,6 +1,8 @@
 import json
 import torch
 import pandas as pd
+import numpy as np
+from copy import deepcopy
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
@@ -48,6 +50,64 @@ def prepare_device(n_gpu_use):
     device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
     list_ids = list(range(n_gpu_use))
     return device, list_ids
+
+def collate_fn(batch):
+    return tuple(zip(*batch))
+    
+# FIXME yeild를 써서 바로 train_indxe, val_index를 리턴하자
+def making_group(data_set):
+    Y = []
+    temp = [0 for _ in range(10)]
+    # 전체를 구한다. 
+    for index in range(len(data_set)):
+        images, masks, image_infos =data_set[index]
+        categorys = np.unique(masks)
+        temp_2 = deepcopy(temp)
+        for cat in categorys:
+            if cat == 0: # Backgroud 
+                continue
+            temp_2[cat-1] = 1 
+        Y.append(temp_2)
+    return Y
+
+def label_accuracy_score(hist):
+    """
+    Returns accuracy score evaluation result.
+      - [acc]: overall accuracy
+      - [acc_cls]: mean accuracy
+      - [mean_iu]: mean IU
+      - [fwavacc]: fwavacc
+    """
+    acc = np.diag(hist).sum() / hist.sum()
+    with np.errstate(divide='ignore', invalid='ignore'):
+        acc_cls = np.diag(hist) / hist.sum(axis=1)
+    acc_cls = np.nanmean(acc_cls)
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
+    mean_iu = np.nanmean(iu)
+
+    freq = hist.sum(axis=1) / hist.sum()
+    fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
+    return acc, acc_cls, mean_iu, fwavacc, iu
+
+
+def add_hist(hist, label_trues, label_preds, n_class):
+    """
+        stack hist(confusion matrix)
+    """
+
+    for lt, lp in zip(label_trues, label_preds):
+        hist += _fast_hist(lt.flatten(), lp.flatten(), n_class)
+
+    return hist
+
+def _fast_hist(label_true, label_pred, n_class):
+    mask = (label_true >= 0) & (label_true < n_class)
+    hist = np.bincount(
+        n_class * label_true[mask].astype(int) +
+        label_pred[mask], minlength=n_class ** 2).reshape(n_class, n_class)
+    return hist
 
 class MetricTracker:
     def __init__(self, *keys, writer=None):

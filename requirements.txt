@@ -6,8 +6,8 @@ tensorboard>=1.14
 effdet
 map-boxes
 ttach
-skleran
+sklearn
 adamp
-adamw
 opencv-python
 pycocotools
+iterative-stratification
