@@ -1,7 +1,10 @@
 import json
 import torch
 import pandas as pd
+<<<<<<< HEAD
 import numpy as np
+=======
+>>>>>>> 3ac6eebd04a40af0dff8c86ffcf7be84eef72df3
 from copy import deepcopy
 from pathlib import Path
 from itertools import repeat
@@ -68,6 +71,7 @@ def making_group(data_set):
                 continue
             temp_2[cat-1] = 1 
         Y.append(temp_2)
+<<<<<<< HEAD
     return Y
 
 def label_accuracy_score(hist):
@@ -108,6 +112,9 @@ def _fast_hist(label_true, label_pred, n_class):
         n_class * label_true[mask].astype(int) +
         label_pred[mask], minlength=n_class ** 2).reshape(n_class, n_class)
     return hist
+=======
+    return y
+>>>>>>> 3ac6eebd04a40af0dff8c86ffcf7be84eef72df3
 
 class MetricTracker:
     def __init__(self, *keys, writer=None):

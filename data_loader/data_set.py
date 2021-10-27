@@ -149,8 +149,28 @@ class CustomSegDataSet(Dataset):
 
         if self.mode == "eval":
             # transform -> albumentations 라이브러리 활용
+<<<<<<< HEAD
             if self.transforms["eval"] is not None:
                 transformed = self.transforms["eval"](image=images)
+=======
+            if self.transform["train"] is not None:
+                transformed = self.transform["train"](image=images, mask=masks)
+                images = transformed["image"]
+                masks = transformed["mask"]
+            return images, masks, image_infos
+
+        if self.mode == "val":
+            # transform -> albumentations 라이브러리 활용
+            if transform is not None:
+                transformed = self.transform["val"](image=images)
+                images = transformed["image"]
+            return images, image_infos
+
+        if self.mode == "eval":
+            # transform -> albumentations 라이브러리 활용
+            if transform is not None:
+                transformed = self.transform["eval"](image=images)
+>>>>>>> 3ac6eebd04a40af0dff8c86ffcf7be84eef72df3
                 images = transformed["image"]
             return images, image_infos
 

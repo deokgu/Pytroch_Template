@@ -4,7 +4,11 @@ from numpy import inf
 from logger import TensorboardWriter
 from sklearn.model_selection import KFold, StratifiedKFold
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+<<<<<<< HEAD
 from utils import making_group, collate_fn
+=======
+from .utils import making_group, collate_fn
+>>>>>>> 3ac6eebd04a40af0dff8c86ffcf7be84eef72df3
 import copy
 
 

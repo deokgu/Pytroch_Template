@@ -51,8 +51,12 @@ def main(config):
     model = model.to(device)
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
+<<<<<<< HEAD
     data_set.set_transforms(transform.transforms)
     
+=======
+
+>>>>>>> 3ac6eebd04a40af0dff8c86ffcf7be84eef72df3
     # get function handles of loss and metrics
     criterion = config.init_obj("loss", module_loss)
     # criterion = getattr(module_loss, config["loss"])
@@ -82,12 +86,21 @@ def main(config):
         trainer = Trainer.Trainer_seg(
             model,
             criterion,
+<<<<<<< HEAD
             optimizer,
             config=config,
             device=device,
+=======
+            # metrics,
+            optimizer,
+            config=config,
+            device=device,
+            transform=transform,
+>>>>>>> 3ac6eebd04a40af0dff8c86ffcf7be84eef72df3
             data_set=data_set,
             lr_scheduler=lr_scheduler,
         )
+    sys.exit()
 
     trainer.train()
 
