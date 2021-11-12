@@ -2,10 +2,12 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch
 
-# F
-def nll_loss(output, target):
-    return F.nll_loss(output, target)
+# TODO: output, target 없어도 잘 동작 하나?
+def torchnnFuncaionalloss(name): # nll_loss 
+    return eval(f"F.{name}()")
 
+def torchnnloass(name,): # CrossEntropyLoss 
+    return eval(f"nn.{name}()")
 
 # https://discuss.pytorch.org/t/is-this-a-correct-implementation-for-focal-loss-in-pytorch/43327/8
 # Focallosf for object Detection https://arxiv.org/pdf/1708.02002.pdf ??

@@ -1,8 +1,9 @@
 # classfication basic
-from .model_classfication import *
-
+from .model_classfication import * # timm, torchvision using
 
 # Segmentation basic
-from .model_segmentation import *
-from .HRnetV2   import *
-from .OCR_HRnetV2 import *
+from .model_segmentation import * # torchvision using
+from .segmentation.HRnetV2   import *
+from .segmentation.OCRHRnetV2 import *
+
+

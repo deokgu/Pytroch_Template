@@ -1,0 +1,76 @@
+/* Object_detection  */
+{
+    "name": "Classfication_Test",
+    "type": "Classfication", /* Classefication, Segmentation*/
+    "seed": 2019,
+    "n_gpu": 1,
+    "save": true,
+    "fold_split": 3,
+    "batch_size": 16,
+    "shuffle": true,
+    "num_workers": 4,
+    "log_step": 15, /* batch_size -> index % self.log_step */
+    "debug": {
+        "set_debug": true,
+        "ratio" : 0.1 /* dataset split -> 0.2 : dataset 20% using for train*/
+    },
+    "data_set":{
+        "type": "MaskBaseDataset",
+        "args": {
+            "data_dir": "/opt/ml/train/"
+        }
+    },
+    "Net": {
+        "type": "ReadTimmModule",
+        "args": {
+            "model_name": "tf_efficientnet_b3",
+            "num_classes": 18,
+            "pretrained": true
+        }
+    },
+    "transform":{
+        "type": "baseTransform",
+        "args": {
+            "mean": [0.460, 0.440, 0.418],
+            "std": [0.210, 0.207, 0.216],
+            "resize": 0,
+            "use_rand_aug": true
+        }
+    },
+    "loss":{
+        "type": "torchnnloass",
+        "args" :{
+            "name": "CrossEntropyLoss"
+        }
+    }, 
+    "metrics": [
+        "accuracy",
+        "top_k_acc",
+        "f1_score"
+        /*"accuracy", "top_k_acc"*/
+    ],
+    "optimizer": {
+        "type": "AdamP",
+        "args":{
+            "lr": 0.001,
+            "betas": [0.9, 0.999],
+            "weight_decay": 1e-2
+        }
+    },
+    "lr_scheduler": {
+        "type": "CosineAnnealingLR",
+        "args": {
+            "T_max" : 50,
+            "eta_min": 0
+        }
+    },
+    "trainer": {
+        "epochs": 5,
+        "save_dir": "logs/",
+        "save_period": 4,
+        "verbosity": 2,
+        "monitor": "min val_loss",
+        "early_stop": 2,
+        "tensorboard": false
+    }
+}
