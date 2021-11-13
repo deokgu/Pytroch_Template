@@ -12,7 +12,7 @@ class baseTransform(object):
     def __init__(self, mean, std, resize, use_rand_aug=False):
         self.mean = mean
         self.std = std
-        if type(resize) == tuple:
+        if type(resize) == list:
             self.x, self.y = resize  # notuse
         else:
             self.x, self.y = (512, 512)
@@ -25,7 +25,8 @@ class baseTransform(object):
             self.transforms["train"] = transforms.Compose(
                 [
                     # transforms resize check 
-                    transforms.CenterCrop((512, 512)),
+                    transforms.Resize((self.x,self.y)),
+                    # transforms.CenterCrop((512, 512)),
                     transforms.ToTensor(),
                     transforms.Normalize(mean=self.mean, std=self.std),
                 ]

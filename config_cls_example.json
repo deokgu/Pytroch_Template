@@ -23,7 +23,7 @@
     "Net": {
         "type": "ReadTimmModule",
         "args": {
-            "model_name": "tf_efficientnet_b3",
+            "model_name": "tf_efficientnetv2_b1",
             "num_classes": 18,
             "pretrained": true
         }
@@ -46,8 +46,8 @@
     "metrics": [
         "accuracy",
         "top_k_acc",
-        "f1_score"
-        /*"accuracy", "top_k_acc"*/
+        "f1_scores"
+        /*"accuracy", "specificity", "recall", "precision", "megative_value", "f1_scores"*/
     ],
     "optimizer": {
         "type": "AdamP",
