@@ -6,6 +6,7 @@ import collections
 import random
 import torch
 import numpy as np
+from torch.utils.data import DataLoader
 
 
 #
@@ -81,7 +82,39 @@ def main(config):
     else:
         assert print(f"lr_scheduler not load")
 
-    if config["type"] == "Classfication":
+    if config["type"] == "basic": 
+        data_loader = DataLoader(data_set,
+                            batch_size= config["batch_size"],
+                            shuffle= config["shuffle"],
+                            num_workers= config["num_workers"],
+                            drop_last=True 
+                        )
+        print(config["valid_set"]["type"])
+        print(config["valid_set"]["type"] != False)
+        if config["valid_set"]["type"] != False:
+            val_data_set = config.init_obj("valid_set", module_data_set)
+            if config["debug"]["set_debug"]:
+                val_data_set.ratio = config["debug"]["ratio"]
+            val_data_set.set_transforms(transform.transforms)
+            valid_data_loader = DataLoader(val_data_set,
+                    batch_size= config["batch_size"],
+                    shuffle= config["shuffle"],
+                    num_workers= config["num_workers"],
+                    drop_last=True 
+                )
+        else:
+            valid_data_loader = None
+        
+        sys.exit()
+        trainer = Trainer.Trainer(
+                        model, criterion, metrics, optimizer,
+                        config=config,
+                        device=device,
+                        data_loader=data_loader,
+                        valid_data_loader=valid_data_loader,
+                        lr_scheduler=lr_scheduler)
+
+    elif config["type"] == "Classfication":
         trainer = Trainer.Trainer_cls(
             model,
             criterion,
@@ -92,7 +125,6 @@ def main(config):
             data_set=data_set,
             lr_scheduler=lr_scheduler,
         )
-
     elif config["type"] == "Segmentation":
         trainer = Trainer.Trainer_seg(
             model,

@@ -4,6 +4,8 @@ from torchvision.utils import make_grid
 from base.base_trainer_cls import BaseTrainer
 from utils import inf_loop, MetricTracker, inf_loop, MetricTracker, mixup_data, mixs_criterion, cutmix_data
 from tqdm import tqdm
+
+
 class Trainer_cls(BaseTrainer):
     """
     Trainer class

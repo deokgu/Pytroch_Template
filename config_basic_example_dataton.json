@@ -1,7 +1,7 @@
 /* Object_detection  */
 {
     "name": "Classfication_Test",
-    "type": "Classfication", /* Classefication, Segmentation*/
+    "type": "basic", /* Classefication, Segmentation*/
     "seed": 2019,
     "n_gpu": 1,
     "save": true,
@@ -15,16 +15,24 @@
         "ratio" : 0.1 /* dataset split -> 0.2 : dataset 20% using for train*/
     },
     "data_set":{
-        "type": "MaskBaseDataset",
+        "type": "dataToneDataset",
         "args": {
-            "data_dir": "/opt/ml/train/"
+            "data_dir": "/opt/ml/train/",
+            "mode": "train"
+        }
+    },
+    "valid_set":{
+        "type": false,
+        "args":{
+            "data_dir": "/opt/ml/train/", /* */
+            "mode": "val"
         }
     },
     "Net": {
         "type": "ReadTimmModule",
         "args": {
             "model_name": "tv_resnext50_32x4d",
-            "num_classes": 18,
+            "num_classes": 2,
             "pretrained": true
         }
     },
