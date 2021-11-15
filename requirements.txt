@@ -9,5 +9,6 @@ ttach
 sklearn
 adamp
 opencv-python
+albumentations
 pycocotools
 iterative-stratification
